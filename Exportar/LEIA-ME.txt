@@ -1,0 +1,7 @@
+Instalar Wordpress
+Importar XML com conteúdo.
+Instalar base local mysql (das demandas)
+
+Acessar o site com o modelo (que integra com local - por enquanto)
+http://www.culturatransparente.org/beta/participaosc/r2d2.html
+
