@@ -1,0 +1,171 @@
+<html>
+  <head>
+    <title>ParticipaOSC</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="shortcut icon" href="http://cartodb.com/assets/favicon.ico" />
+
+  <style>
+    html, body {width:100%; height:100%; padding: 0; margin: 0;}
+    #map { width: 100%; height:100%; background: black;}
+    #menu { position: absolute; top: 5px; right: 10px; width: 800px; height:60px; background: transparent; z-index:10;}
+    #menu a { 
+      margin: 15px 10px 0 0;
+      float: right;
+      vertical-align: baseline;
+      width: 70px;
+      padding: 10px;
+      text-align: center;
+      font: bold 11px "Helvetica",Arial;
+      line-height: normal;
+      color: #555;
+      border-radius: 4px;
+      border: 1px solid #777777;
+      background: #ffffff;
+      text-decoration: none;
+      cursor: pointer;
+    }
+  
+     #layer_selector li {
+        border-bottom: 2px solid #000000;
+        padding: 10px 25px;
+        font-family: "Helvetica",Arial;
+        font-size: 12px;
+        color: #000000;
+        cursor: auto;
+      }
+      a:link,a:visited {
+display:inline;
+font-weight:bold;
+color:#000000;
+background-color:#FFFFFF;
+width:200px;
+font: normal 15px/17px Arial, Sans-serif;
+text-align:center;
+padding:0px;
+text-decoration:none;
+}
+a:hover,a:active
+{
+background-color:#CFCFCF;
+}
+      #layer_selector li:hover {
+        background-color: #CCCCCC;
+        cursor: pointer;
+      }
+      #layer_selector li.selected {
+        background-color: #999999;
+      }
+  </style>
+    
+     <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v3/themes/css/cartodb.css">
+  <!--[if lte IE 8]>
+    <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v3/themes/css/cartodb.ie.css" />
+  <![endif]-->
+ 
+ </head>
+
+
+<body onload="init()">
+
+  <a href="http://www.culturatransparente.org" target="_blank">Home</a>
+<a href="http://www.culturatransparente.org" target="_blank">Política de Doação</a>
+<a href="http://www.opendefinition.org/okd/">Dados Abertos</a>
+<a href="http://www.culturatransparente.org">Parceiros</a>
+<a href="http://www.culturatransparente.org">Datasets</a>
+<a href="http://www.culturatransparente.org">Código Fonte</a>
+<a href="http://www.culturatransparente.org">Glossário</a>
+<a href="http://www.culturatransparente.org">Contato</a>
+<a href="http://www.culturatransparente.org">Sobre</a>
+   <div id="map"></div>
+  
+  <div id="map"></div>
+  <div id="menu">
+  <!--  <a href="#unknown" id="unknown" class="button unknown">UNKNOWN</a>
+    <a href="#2014" id="2014" class="button 2014">2014</a> 
+    <a href="#2013" id="2013" class="button 2013">2013</a> 
+    <a href="#2012" id="2012" class="button 2012">2012</a> -->
+    <a href="#2011" id="2011" class="button 2011">Sudeste</a> 
+    <a href="#all" id="all" class="button all">Todos</a>
+  </div>
+
+    </script>
+  
+  <script>
+  var map;
+  function init(){
+    // initiate leaflet map
+    map = new L.Map('map', { 
+      center: [-23,-46],
+      zoom: 5
+    })
+   
+    // add a base layer http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg http://{s}.api.cartocdn.com/base-light/{z}/{x}/{y}.png http://a.tile.openstreetmap.org/{z}/{x}/{y}.png
+    L.tileLayer('http://otile1.mqcdn.com/tiles/1.0.0/map/{z}/{x}/{y}.jpg', {
+      attribution: 'ParticipaOSC'
+    }).addTo(map);
+    
+    var layerUrl = 'http://caiopinto.cartodb.com/api/v2/viz/985e4ade-e600-11e3-bf55-0e10bcd91c2b/viz.json';
+
+    var sublayers = [];
+  
+  cartodb.createLayer(map, layerUrl)
+    .addTo(map)
+    .on('done', function(layer) {
+      // change the query for the first layer
+      var subLayerOptions = {
+        sql: "SELECT * FROM mondatfinal_csv"
+      }
+
+      var sublayer = layer.getSubLayer(0);
+
+      sublayer.set(subLayerOptions);
+
+      sublayers.push(sublayer);
+    }).on('error', function() {
+      //log the error
+    });
+    
+    var LayerActions = {
+    all: function(){
+      sublayers[0].setSQL("SELECT * FROM mondatfinal_csv");
+      return true;
+    },
+    2011: function(){
+      sublayers[0].setSQL("SELECT * FROM mondatfinal_csv WHERE regiao = 'Sudeste'");
+      return true;
+    },
+    2012: function(){
+      sublayers[0].setSQL("SELECT * FROM test WHERE year IN ('2012','2012/2013') AND year IS NOT NULL");
+      return true;
+    },
+    2013: function(){
+      sublayers[0].setSQL("SELECT * FROM test WHERE year IN ('2013','2012/2013','2013/2014') AND year IS NOT NULL");
+      return true;
+    },
+    2014: function(){
+      sublayers[0].setSQL("SELECT * FROM test WHERE year IN ('2014','2013/2014') AND year IS NOT NULL");
+      return true;
+    },
+    unknown: function(){
+      sublayers[0].setSQL("SELECT * FROM test WHERE year IN ('') OR year IS NULL");
+      return true;
+    }
+  }
+    
+    $('.button').click(function() {
+    $('.button').removeClass('selected');
+    $(this).addClass('selected');
+    LayerActions[$(this).attr('id')]();
+  });
+  
+  }
+  </script>
+
+   <script src="http://libs.cartodb.com/cartodb.js/v3/cartodb.js"></script>
+   <script type="text/javascript" src="js/app.js"></script>
+
+
+    
+</body>
+</html>
